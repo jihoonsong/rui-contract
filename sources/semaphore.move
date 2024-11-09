@@ -20,10 +20,12 @@ module rui::semaphore {
     }
     
     public struct AddMemberEvent has copy, drop {
+        id: ID,
         identity_commitment: vector<u8>,
     }
 
     public struct RemoveMemberEvent has copy, drop {
+        id: ID,
         identity_commitment: vector<u8>,
     }
 
@@ -51,6 +53,7 @@ module rui::semaphore {
         });
         
         event::emit(AddMemberEvent {
+            id: object::uid_to_inner(&group.id),
             identity_commitment,
         });
     }
@@ -62,6 +65,7 @@ module rui::semaphore {
                 let Member { identity_commitment: _ } = group.members.remove(i);
 
                 event::emit(RemoveMemberEvent {
+                    id: object::uid_to_inner(&group.id),
                     identity_commitment,
                 });
 
