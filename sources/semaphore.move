@@ -76,7 +76,7 @@ module rui::semaphore {
         };
     }
 
-    entry fun verify_proof(verifying_key: vector<u8>, proof_points: vector<u8>, public_inputs: vector<u8>): bool {
+    public fun verify_proof(verifying_key: vector<u8>, proof_points: vector<u8>, public_inputs: vector<u8>): bool {
         let prepared_verifying_key = groth16::prepare_verifying_key(&groth16::bn254(), &verifying_key);
         let proof_points = groth16::proof_points_from_bytes(proof_points);
         let public_proof_inputs = groth16::public_proof_inputs_from_bytes(public_inputs);

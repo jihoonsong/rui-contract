@@ -3,6 +3,8 @@ module rui::board {
     use sui::tx_context::sender;
     use sui::event;
     use std::string::String;
+    
+    use rui::semaphore;
 
     public struct BOARD has drop {}
 
@@ -40,7 +42,9 @@ module rui::board {
         transfer::transfer(qa, sender(ctx));
     }
 
-    entry fun add_answer(qa: &mut QA, answer: vector<u8>, _ctx: &mut TxContext) {
+    entry fun add_answer(verifying_key: vector<u8>, proof_points: vector<u8>, public_inputs: vector<u8>, qa: &mut QA, answer: vector<u8>, _ctx: &mut TxContext) {
+        assert!(semaphore::verify_proof(verifying_key, proof_points, public_inputs));
+
         vector::push_back<vector<u8>>(&mut qa.answers, answer);
 
         event::emit(AddAnswerEvent {
