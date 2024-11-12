@@ -3,7 +3,7 @@ module rui::board {
     use sui::tx_context::sender;
     use sui::event;
     use std::string::String;
-    
+
     use rui::semaphore;
 
     public struct BOARD has drop {}
@@ -51,5 +51,25 @@ module rui::board {
             id: object::uid_to_inner(&qa.id),
             answer,
         });
+    }
+
+    #[test_only]
+    public fun test_create_qa(question: String, ctx: &mut TxContext): QA {
+        QA {
+            id: object::new(ctx),
+            question,
+            answers: vector::empty(),
+        }
+    }
+
+    #[test_only]
+    public fun test_delete_qa(qa: QA) {
+        let QA {
+            id: qa_id,
+            question: _,
+            answers: _,
+        } = qa;
+
+        object::delete(qa_id);  
     }
 }
