@@ -2,6 +2,8 @@ module rui::board {
     use sui::package;
     use sui::tx_context::sender;
     use sui::event;
+    use sui::coin::{Self, Coin};
+    use sui::sui::SUI;
     use std::string::String;
 
     use rui::semaphore;
@@ -12,6 +14,7 @@ module rui::board {
         id: UID,
         question: String,
         answers: vector<vector<u8>>,
+        creator: address,
     }
 
     public struct CreateQAEvent has copy, drop {
@@ -21,6 +24,12 @@ module rui::board {
     public struct AddAnswerEvent has copy, drop {
         id: ID,
         answer: vector<u8>,
+    }
+
+    public struct UnlockNameEvent has copy, drop {
+        recipient: address,
+        sender: vector<u8>,
+        fee: u64,
     }
 
     fun init(witness: BOARD, ctx: &mut TxContext) {
@@ -33,6 +42,7 @@ module rui::board {
             id: object::new(ctx),
             question,
             answers: vector::empty(),
+            creator: sender(ctx),
         };
 
         event::emit(CreateQAEvent {
@@ -53,12 +63,24 @@ module rui::board {
         });
     }
 
+    entry fun unlock_name(admin: address, identity_commitment: vector<u8>, fee: Coin<SUI>, _ctx: &TxContext) {
+        let amount = coin::value(&fee);
+        transfer::public_transfer(fee, admin);
+
+        event::emit(UnlockNameEvent {
+            recipient: admin,
+            sender: identity_commitment,
+            fee: amount,
+        });
+    }
+
     #[test_only]
     public fun test_create_qa(question: String, ctx: &mut TxContext): QA {
         QA {
             id: object::new(ctx),
             question,
             answers: vector::empty(),
+            creator: sender(ctx),
         }
     }
 
@@ -68,6 +90,7 @@ module rui::board {
             id: qa_id,
             question: _,
             answers: _,
+            creator: _,
         } = qa;
 
         object::delete(qa_id);  
